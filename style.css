@@ -1,0 +1,30 @@
+
+@font-face {
+    font-family: 'BlockyFont';
+    src: url('Fonts/Blocky/blocky.ttf') format('truetype');
+}
+/* 1. Reset margins and enforce the container to be full-screen */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111111; /* Dark gray so you can see the black canvas boundaries */
+    overflow: hidden;
+    
+    /* 2. Flexbox strictly forces any child (the canvas) to the absolute center */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    display: block;
+    background-color: #000000;
+
+    /* 3. CRITICAL: Force the browser GPU to upscale smoothly while keeping pixel edges sharp */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}

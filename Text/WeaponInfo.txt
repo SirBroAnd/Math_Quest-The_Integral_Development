@@ -1,0 +1,32 @@
+Standard Sword
+The Standard Sword of Edutopia
+Flame Blade
+A Sword Infused With Fire
+Lightning Blade
+A Sword Infused With Lightning
+Ice Blade
+A Sword Infused With Ice
+Heavy Sword
+A Very Heavy Sword Offering High Damage but Requiring Incredible Accuracy
+The Sword of Light
+A Sword of Divine origins that heals the user by a small amount upon a Successful Attack
+The Sword of Darkness
+A very powerful sword that drains life energy upon unsuccessful attacks
+Short Sword
+A Short Sword allowing for faster strikes
+Spear
+The Standard Spear of Edutopia
+Boiling Point
+A Spear Infused with Fire
+Thundering Spear
+A Spear Infused with Lightning
+Snow Tip
+A Spear Infused with Ice
+Ice Rod
+Used by the best Ice mages of Edutopia
+Fire Rod
+Used by the best Fire mages of Edutopia
+Lightning Rod
+Used by the best Lightning mages of Edutopia
+Utility Rod
+Used by the best Utility mages of Edutopia
