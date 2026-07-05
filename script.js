@@ -40,7 +40,7 @@ let WeaponText = [
 */
 let WeaponsStats = [
                     [1,1,0,0],
-                    [4,1,10,0],
+                    [5,1,10,0],
                     [2,2,8,1],
                     [2,2,8,2],
                     [2,2,8,3],
@@ -87,6 +87,8 @@ let Keys = [false,false,false,false];
 let KeyDelay = [0,0,0,0];
 let playerx = 0;
 let playery = 0;
+let QueueN = 0;
+
 // 0 is Map
 // 1 is Fight
 // 2 is Math Question
@@ -98,18 +100,200 @@ let Menu = 0;
 // 0 is attack 1-4 is spells, 5 is flee, items never ask question and can never fail, Magic when failed has a 65% damage decrease and if it's a positive buff it has a 30% chance of failing with healing getting a 65% reduced effectiveness instead of chance of failing.
 let SelectedAction = 0;
 
-// Player, Enemy, Additional Player, Additional Enemy
-let AnimFrame = [0,0,0,0];
-/*
- 0:None
- 1:Fire
- 2:Lightning
- 3:Ice
- 4:Light
- 5:Dark
- 6:Heal
-*/
-let AnimType = [0,0,1,1];
+class Animation
+{
+    constructor(Type, Target, Queue, Damage)
+    {
+        this.Type = Type;
+        this.Target = Target;
+        this.Queue = Queue;
+        this.AnimFrame = 0;
+        this.Damage = Damage;
+        this.DamageDealt = 0;
+        this.Initialize();
+    }
+    Initialize()
+    {
+        switch(this.Type)
+        {
+            case 0:
+                // Default Attack (Sword)
+                this.AnimFrame = 30;
+                break;
+            case 1:
+                // Fire
+                this.AnimFrame = 30;
+                break;
+            case 2:
+                // Lightning
+                this.AnimFrame = 30;
+                break;
+            case 3:
+                // Ice
+                this.AnimFrame = 30;
+                break;
+            case 4:
+                // Light
+                this.AnimFrame = 30;
+                break;
+            case 5:
+                // Dark
+                this.AnimFrame = 30;
+                break;
+            case 6:
+                // Heal
+                this.AnimFrame = 30;
+                break;
+            default:
+                console.log("Animation Type: "+this.Type.toString()+" Does not exist. If you are a user please report this to the developer. (Initialization Phase)");
+        }
+    }
+    Render()
+    {
+        this.AnimFrame -= 1;
+        ctx.font = '20px "BlockyFont"';
+        ctx.textAlign = "center";
+        // Heal
+        if(this.Type == 6)
+        {
+            ctx.fillStyle = "#30B550";
+            // Player
+            if(this.Target == 0)
+            {
+                if(this.Damage > 0)
+                {
+                    if(((30-this.AnimFrame)*(this.Damage/30))-this.DamageDealt>=1)
+                    {
+                        PlayerHp += Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                        this.DamageDealt += Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                    }
+                    if(this.AnimFrame == 0)
+                    {
+                        PlayerHp += (this.Damage - this.DamageDealt);
+                    }
+                    ctx.fillText("+"+this.Damage.toString(),150,200-(30-this.AnimFrame)*2);
+                }
+                else
+                {
+                    ctx.fillText("Miss",150,200-(30-this.AnimFrame)*2);
+                }
+            }
+            // Enemy
+            else
+            {
+                if(this.Damage > 0)
+                {
+                    if(((30-this.AnimFrame)*(this.Damage/30))-this.DamageDealt>=1)
+                    {
+                        EnemyHp += Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                        this.DamageDealt += Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                    }
+                    if(this.AnimFrame == 0)
+                    {
+                        EnemyHp += (this.Damage - this.DamageDealt);
+                    }
+                    ctx.fillText("+"+this.Damage.toString(),650,200-(30-this.AnimFrame)*2);
+                }
+                else
+                {
+                    ctx.fillText("Miss",650,200-(30-this.AnimFrame)*2);
+                }
+            }
+        }
+        else
+        {
+            if(this.Type == 0)
+            {
+                ctx.fillStyle = "#EEEEEE";
+            }
+            else if(this.Type == 1)
+            {
+                ctx.fillStyle = "#FF9933";
+            }
+            else if(this.Type == 2)
+            {
+                ctx.fillStyle = "#EEEE44";
+            }
+            else if(this.Type == 3)
+            {
+                ctx.fillStyle = "#AABBFF";
+            }
+            // Player
+            if(this.Target == 0)
+            {
+                if(((30-this.AnimFrame)*(this.Damage/30))-this.DamageDealt>=1)
+                {
+                    PlayerHp -= Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                    this.DamageDealt += Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                }
+                if(this.AnimFrame == 0)
+                {
+                    PlayerHp -= (this.Damage - this.DamageDealt);
+                }
+                if(this.Damage > 0)
+                {
+                    ctx.fillText("-"+this.Damage.toString(),150,200-(30-this.AnimFrame)*2);
+                }
+                else
+                {
+                    ctx.fillText("Miss",150,200-(30-this.AnimFrame)*2);
+                }
+            }
+            // Enemy
+            else
+            {
+                if(((30-this.AnimFrame)*(this.Damage/30))-this.DamageDealt>=1)
+                {
+                    EnemyHp -= Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                    this.DamageDealt += Math.floor(((30-this.AnimFrame)*(this.Damage))/30-this.DamageDealt);
+                }
+                if(this.AnimFrame == 0)
+                {
+                    EnemyHp -= (this.Damage - this.DamageDealt);
+                }
+                if(this.Damage > 0)
+                {
+                    ctx.fillText("-"+this.Damage.toString(),650,200-(30-this.AnimFrame)*2);
+                }
+                else
+                {
+                    ctx.fillText("Miss",650,200-(30-this.AnimFrame)*2);
+                }
+            }
+        }
+        switch(this.Type)
+        {
+            case 0:
+                if(this.Target == 1)
+                {
+                    ctx.drawImage(WeaponsImage, 32*((Equipment[0]-1)%4),32*Math.floor((Equipment[0]-1)/4),32,32,170,200,32,32);
+                }
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+        }
+    }
+    MatchingQueue()
+    {
+        return this.Queue == QueueN;
+    }
+    Complete()
+    {
+        return this.AnimFrame<=0;
+    }
+}
+
+let Animations = [];
 
 // Heart beat
 let PAF = [0]; // Player Animation Frames
@@ -240,14 +424,14 @@ function LoadBattle(Type)
     CalcPS();
     if(Type == 0)
     {
-        EnemyHp = 4;
-        EnemyMhp = 4;
+        EnemyHp = 24;
+        EnemyMhp = 24;
         EnemyAtk = 1;
         EnemyDef = 0;
         EnemyMDef = 0;
     }
-    AnimFrame = [0,0,0,0];
-    Screen = 1
+    Animations = [];
+    Screen = 1;
 }
 
 class Chunk
@@ -327,7 +511,6 @@ class TextBox
     // Checks if clicked on
     CheckMouse()
     {
-        return true;
         if(this.type == 0)
         {
             return RelMouseX>this.x && RelMouseX<this.x+this.bx && RelMouseY>this.y && RelMouseY<this.y+this.by;
@@ -476,24 +659,6 @@ function DisplayQuestion(x,y,color)
 
 function render()
 {
-    /*// 1. Calculate the ideal fractional scale factor
-    const rawScaleX = CanvasW / 800;
-    const rawScaleY = CanvasH / 450;
-
-    // 2. FORCE an integer scale by picking the smaller ratio and flooring it
-    // If the screen allows for a 2.4x zoom, this rounds it safely down to a perfect 2x.
-    let pixelScale = Math.floor(Math.min(rawScaleX, rawScaleY));
-
-    // Safety check: Ensure the game doesn't scale down to 0 on tiny screens
-    if (pixelScale < 1) pixelScale = 1;
-
-    // 3. Center the drawing grid on the canvas (creates the letterbox effect)
-    const offsetX = Math.floor((CanvasW - (800 * pixelScale)) / 2);
-    const offsetY = Math.floor((CanvasH - (450 * pixelScale)) / 2);
-    ctx.scale(pixelScale, pixelScale);*/
-    //800 by 450
-
-    
     if(Screen == 0 || Screen == 3)
     {
         ctx.save()
@@ -586,7 +751,7 @@ function render()
         ctx.fillRect(630,193,40,64);
         
         ctx.fillStyle = "#404040";
-        for(let i=Math.floor(EnemyHp/4);i<Math.floor(EnemyMhp*0.25);i++)
+        for(let i=Math.max(Math.floor(EnemyHp/4),0);i<Math.floor(EnemyMhp*0.25);i++)
         {
             ctx.drawImage(StatsImage,128,0,32,32,500+(i%10)*20,30+Math.floor(i/10)*20,16,16);
         }
@@ -597,20 +762,23 @@ function render()
             //ctx.fillRect(500+(i%10)*24,30+Math.floor(i/10)*24,16,16);
         }
         EAF[0] = (EAF[0]+1)%40;
-        switch(EnemyHp%4)
+        if(EnemyHp>0)
         {
-            case 0:
-                ctx.drawImage(StatsImage,0,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
-                break;
-            case 1:
-                ctx.drawImage(StatsImage,96,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
-                break;
-            case 2:
-                ctx.drawImage(StatsImage,64,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
-                break;
-            case 3:
-                ctx.drawImage(StatsImage,32,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
-                break;
+            switch(EnemyHp%4)
+            {
+                case 0:
+                    ctx.drawImage(StatsImage,0,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
+                    break;
+                case 1:
+                    ctx.drawImage(StatsImage,96,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
+                    break;
+                case 2:
+                    ctx.drawImage(StatsImage,64,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
+                    break;
+                case 3:
+                    ctx.drawImage(StatsImage,32,0,32,32,500+(Math.floor((EnemyHp-1)/4)%10)*20,30+Math.floor(Math.floor((EnemyHp-1)/4)/10)*20,16,16);
+                    break;
+            }
         }
         
         ctx.fillStyle = "#EEEEEE";
@@ -620,145 +788,47 @@ function render()
         
         ctx.fillText(PlayerName,20,20);
         
-        if(AnimFrame[0]>0)
+        for(let i=0;i<Animations.length;i++)
         {
-            // Render Weapon
-            ctx.drawImage(WeaponsImage, 32*((Equipment[0]-1)%4),32*Math.floor((Equipment[0]-1)/4),32,32,170,200,32,32);
-            AnimFrame[0] -= 1;
-            
-            // Apply Effect
-            if(AnimFrame[0] == 0)
+            if(Animations[i].MatchingQueue())
             {
-                if(SelectedAction == 0)
+                Animations[i].Render();
+                if(Animations[i].Complete())
                 {
-                    if(Accurate)
+                    Animations.splice(i,1);
+                    i--;
+                    // Check For Queue Change
+                    let NewQ = 50;
+                    for(let j=0;j<Animations.length;j++)
                     {
-                        EnemyHp -= Math.max(PlayerAtk-EnemyDef,1);
+                        if(Animations[j].Queue == QueueN)
+                        {
+                            NewQ = QueueN;
+                            break;
+                        }
+                        if(Animations[j].Queue < NewQ)
+                        {
+                            NewQ = Animations[j].Queue;
+                        }
                     }
-                }
-                if(EnemyHp <= 0)
-                {
-                    Screen = 0;
-                }
-                AnimFrame[1] = 60;
-            }
-            if(AnimFrame[0]<30)
-            {
-                if(SelectedAction == 0)
-                {
-                    ctx.fillStyle = "#EEEEEE";
-                    ctx.textAlign = "center";
-                    if(Accurate)
+                    if(NewQ == 50)
                     {
-                        ctx.fillText("-"+Math.max(PlayerAtk-EnemyDef,1).toString(),650,200-(30-AnimFrame[0])*2);
+                        QueueN = 0;
                     }
                     else
                     {
-                        ctx.fillText("Miss",650,200-(30-AnimFrame[0])*2);
+                        QueueN = NewQ;
                     }
-                }
-                else if(SelectedAction<5)
-                {
-                    ctx.fillStyle = "#339933";
-                    ctx.textAlign = "center";
-                }
-            }
-        }
-        if(AnimFrame[2]>0)
-        {
-            AnimFrame[2] -= 1;
-            
-            // Apply Effect
-            if(AnimFrame[2] == 0)
-            {
-                if(Accurate)
-                {
-                    EnemyHp -= Math.max(PlayerAtk-EnemyDef,1);
-                }
-                if(EnemyHp <= 0)
-                {
-                    Screen = 0;
-                }
-            }
-            
-            // Animation
-            if(AnimFrame[2]<30)
-            {
-                ctx.fillStyle = "#EEEEEE";
-                ctx.textAlign = "center";
-                if(Accurate)
-                {
-                    /*
-                     0:None
-                     1:Fire
-                     2:Lightning
-                     3:Ice
-                     4:Light
-                     5:Dark
-                     6:Heal
-                    */
-                    if(AnimType[2] == 1)
+                    if(EnemyHp <= 0)
                     {
-                        ctx.fillText("-FireDamage",650,220-(30-AnimFrame[0])*2);
-                    }
-                }
-            }
-        }
-        if(AnimFrame[1]>0)
-        {
-            AnimFrame[1] -= 1;
-            if(AnimFrame[1] == 0)
-            {
-                PlayerHp -= Math.max(EnemyAtk-PlayerDef,1);
-            }
-            if(AnimFrame[1]<30)
-            {
-                ctx.fillText("-"+Math.max(EnemyAtk-PlayerDef,1).toString(),150,200-(30-AnimFrame[1])*2);
-            }
-        }
-        if(AnimFrame[3]>0)
-        {
-            AnimFrame[3] -= 1;
-            
-            // Apply Effect
-            if(AnimFrame[3] == 0)
-            {
-                if(Accurate)
-                {
-                    EnemyHp -= Math.max(PlayerAtk-EnemyDef,1);
-                }
-                if(EnemyHp <= 0)
-                {
-                    Screen = 0;
-                }
-            }
-            
-            // Animation
-            if(AnimFrame[3]<30)
-            {
-                ctx.fillStyle = "#EEEEEE";
-                ctx.textAlign = "center";
-                if(Accurate)
-                {
-                    /*
-                     0:None
-                     1:Fire
-                     2:Lightning
-                     3:Ice
-                     4:Light
-                     5:Dark
-                     6:Heal
-                    */
-                    if(AnimType[3] == 1)
-                    {
-                        ctx.fillText("-FireDamage",150,220-(30-AnimFrame[0])*2);
+                        Screen = 0;
+                        break;
                     }
                 }
             }
         }
         
-        console.log(AnimFrame);
-        if(AnimFrame[0] == 0 && AnimFrame[1] == 0 && AnimFrame[2] == 0)// && AnimFrame[3] == 0)
+        if(Animations.length == 0)
         {
             ctx.fillStyle = "#202856";
             ctx.fillRect(250,250,300,200);
@@ -902,7 +972,7 @@ window.onload = function()
         
         RelMouseX = 800*(mousex/CanvasW);
         RelMouseY = 450*(mousey/CanvasH);
-        console.log(RelMouseX,RelMouseY);
+        //console.log(RelMouseX,RelMouseY);
         
         if(Screen == 1)
         {
@@ -975,50 +1045,53 @@ window.onload = function()
                 }
                 Screen = 1;
                 Menu = 0;
-                AnimType[0] = 1; // Attack
-                AnimFrame[0] = 30;
-                if(Equipment[0] == 2)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 1;
-                }
-                else if(Equipment[0] == 3)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 2;
-                }
-                else if(Equipment[0] == 4)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 3;
-                }
-                else if(Equipment[0] == 6)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 4;
-                }
-                else if(Equipment[0] == 7)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 5;
-                }
-                else if(Equipment[0] == 10)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 1;
-                }
-                else if(Equipment[0] == 11)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 2;
-                }
-                else if(Equipment[0] == 12)
-                {
-                    AnimFrame[2] = 30;
-                    AnimType[2] = 3;
-                }
                 
                 Accurate = AnswersCorrect == TextBoxes.length;
+                
+                if(!Accurate)
+                {
+                    Accurate = Math.random()*100<PlayerAccuracy;
+                }
+                
+                let CQ = 0;
+                QueueN = 0;
+                
+                if(Accurate)
+                {
+                    // A totally super complex damage formula
+                    let d = Math.max(PlayerAtk-EnemyDef,1);
+                    
+                    // Player Attack
+                    Animations.push(new Animation(0, 1, CQ, d));
+                    CQ+=1;
+                    
+                    // Fire Sword
+                    if(Equipment[0] == 2 || Equipment[0] == 10)
+                    {
+                        d = Math.max(PlayerMagic-EnemyMDef,1); // Add Enemy Weaknesses
+                        Animations.push(new Animation(1, 1, CQ, d));
+                        CQ+=1;
+                    }
+                    
+                    // Lightning Sword
+                    if(Equipment[0] == 3 || Equipment[0] == 11)
+                    {
+                        d = Math.max(PlayerMagic-EnemyMDef,1);
+                        Animations.push(new Animation(2, 1, CQ, d));
+                        CQ+=1;
+                    }
+                    
+                    // Ice Sword
+                    if(Equipment[0] == 4 || Equipment[0] == 12)
+                    {
+                        d = Math.max(PlayerMagic-EnemyMDef,1); // Add Enemy Weaknesses
+                        Animations.push(new Animation(3, 1, CQ, d));
+                        CQ+=1;
+                    }
+                }
+                // Enemy Attack
+                Animations.push(new Animation(0, 0, CQ, Math.max(EnemyAtk-PlayerDef,1)));
+                
                 TextBoxes = [];
                 SelectedTextBox = -1;
             }
@@ -1084,13 +1157,10 @@ window.onload = function()
         }
         if(SelectedTextBox>-1)
         {
-            console.log("Texting");
-            console.log(SelectedTextBox);
             TextBoxes[SelectedTextBox].Update(event.key,event.keyCode)
         }
         else
         {
-            console.log("Cool");
             // w
             if (event.keyCode == 87)
             {
